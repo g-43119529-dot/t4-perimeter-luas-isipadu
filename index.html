@@ -1,0 +1,1332 @@
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10172d">
+<title>MathLab 3D | Perimeter, Luas & Isi Padu Tahun 4</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<style>
+:root {
+  --bg: #10172d;
+  --panel: #192440;
+  --panel2: #202e4c;
+  --text: #f4f7ff;
+  --muted: #a9b6d2;
+  --border: #354362;
+  --pink: #ff4f9a;
+  --yellow: #f5e85d;
+  --green: #80f5a5;
+  --cyan: #4de5ff;
+  --blue: #578dff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 15px;
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+header {
+  padding: 22px clamp(14px, 3vw, 40px);
+  background: linear-gradient(115deg, #172747, #273766 60%, #322a60);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  max-width: 1550px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.eyebrow {
+  color: var(--cyan);
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 900;
+}
+h1 {
+  font-size: clamp(25px, 3vw, 38px);
+  line-height: 1.15;
+  margin: 8px 0;
+}
+header p {
+  color: #d0dafa;
+  margin: 0;
+  line-height: 1.6;
+}
+.header-badge {
+  border: 1px solid #6277a7;
+  background: #ffffff0b;
+  border-radius: 15px;
+  padding: 13px 17px;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: 800;
+}
+.header-badge span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 5px;
+}
+main {
+  max-width: 1550px;
+  margin: auto;
+  padding: 22px clamp(10px, 2.5vw, 34px) 35px;
+}
+.objective {
+  display: flex;
+  gap: 13px;
+  padding: 15px 18px;
+  background: #202e4c;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  margin-bottom: 19px;
+  line-height: 1.7;
+}
+.objective .emoji { font-size: 26px; }
+.objective strong { color: var(--cyan); }
+.objective small { color: var(--muted); }
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 17px;
+  align-items: start;
+}
+.card {
+  min-width: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 17px 19px;
+}
+.card-heading h2 { margin: 0; font-size: 18px; }
+.muted { color: var(--muted); line-height: 1.6; font-size: 13px; }
+.status {
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--green);
+  background: #80f5a512;
+  border: 1px solid #80f5a544;
+  padding: 6px 10px;
+  border-radius: 20px;
+}
+#sceneWrap {
+  position: relative;
+  margin: 0 10px;
+  overflow: hidden;
+  border-radius: 13px;
+  background: linear-gradient(#182c4c, #19213a 65%, #1c2942);
+}
+#scene {
+  display: block;
+  width: 100%;
+  height: 490px;
+  touch-action: none;
+  outline: none;
+}
+.overlay {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  padding: 9px 12px;
+  border-radius: 11px;
+  background: #10172de8;
+  border: 1px solid #536484;
+  font-size: 11px;
+  color: var(--muted);
+}
+.overlay strong {
+  display: block;
+  color: white;
+  font-size: 16px;
+  margin-top: 4px;
+}
+#tagP { top: 12px; left: 12px; }
+#tagL { top: 12px; right: 12px; }
+#tagT { bottom: 12px; left: 12px; }
+#sceneHelp {
+  right: 12px;
+  bottom: 12px;
+  font-size: 10px;
+  line-height: 1.7;
+  text-align: right;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 18px 18px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 10px; height: 10px; border-radius: 3px; }
+.sidebar { display: grid; gap: 14px; }
+.control-body { padding: 0 18px 19px; }
+.slider-block { margin: 12px 0 21px; }
+.slider-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+.slider-head label { font-weight: 800; }
+.slider-value {
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #ffffff0e;
+  border: 1px solid var(--border);
+  font-weight: 900;
+  min-width: 38px;
+  text-align: center;
+}
+input[type=range] { width: 100%; cursor: pointer; }
+#panjang { accent-color: var(--pink); }
+#lebar { accent-color: var(--green); }
+#tinggi { accent-color: var(--cyan); }
+.scale {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 4px;
+}
+.mode-list { display: grid; gap: 9px; }
+.mode {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: .18s;
+}
+.mode input { margin-top: 4px; accent-color: white; }
+.mode strong { display: block; font-size: 13px; }
+.mode small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.5;
+  font-size: 11px;
+}
+.mode .mode-icon { font-size: 23px; }
+.mode:has(input:checked) { background: #ffffff0b; }
+.mode:has(input[value="perimeter"]:checked) {
+  border-color: var(--pink);
+  background: #ff4f9a12;
+}
+.mode:has(input[value="area"]:checked) {
+  border-color: var(--green);
+  background: #80f5a512;
+}
+.mode:has(input[value="volume"]:checked) {
+  border-color: var(--cyan);
+  background: #4de5ff12;
+}
+.buttons { display: grid; gap: 9px; }
+.btn {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  padding: 12px;
+  font-weight: 900;
+  transition: .15s;
+}
+.btn:hover { filter: brightness(1.09); transform: translateY(-1px); }
+.btn:disabled { opacity: .55; cursor: wait; transform: none; }
+.btn-animate { color: #11182d; background: var(--cyan); }
+.btn-reset { background: #ffffff0c; color: white; border-color: var(--border); }
+#animStatus { margin: 11px 0 0; font-size: 12px; }
+.math-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 17px;
+}
+.math-card {
+  min-width: 0;
+  border-radius: 16px;
+  padding: 19px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  transition: border-color .2s;
+}
+.math-card.active-p { border-color: var(--pink); }
+.math-card.active-a { border-color: var(--green); }
+.math-card.active-v { border-color: var(--cyan); }
+.math-card h3 { font-size: 15px; margin: 0 0 13px; }
+.math-card .formula {
+  font-size: clamp(16px, 1.8vw, 22px);
+  font-weight: 900;
+  margin: 13px 0;
+  overflow-wrap: anywhere;
+}
+.math-card .answer {
+  font-size: clamp(25px, 3vw, 35px);
+  font-weight: 900;
+  overflow-wrap: anywhere;
+  margin: 10px 0;
+}
+.pink { color: var(--pink); }
+.yellow { color: var(--yellow); }
+.green { color: var(--green); }
+.cyan { color: var(--cyan); }
+.math-card .explain {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.math-card .explain strong { color: white; }
+.active-note {
+  margin-top: 12px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: #ffffff08;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+#layers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+}
+.layer-chip {
+  background: #4de5ff15;
+  color: var(--cyan);
+  border: 1px solid #4de5ff35;
+  border-radius: 6px;
+  padding: 5px 7px;
+  font-size: 10px;
+  font-weight: 800;
+}
+.lesson {
+  margin-top: 17px;
+  padding: 22px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+.lesson h2 { margin: 0 0 8px; font-size: 20px; }
+.lesson > p { color: var(--muted); line-height: 1.7; font-size: 13px; }
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 17px;
+}
+.step {
+  padding: 14px;
+  border-radius: 12px;
+  background: #ffffff06;
+  border: 1px solid var(--border);
+  line-height: 1.65;
+  font-size: 12px;
+  color: var(--muted);
+}
+.step strong { display: block; color: white; font-size: 13px; margin-bottom: 5px; }
+.step b { display: block; margin-top: 8px; font-size: 14px; }
+.step-no {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 9px;
+  background: var(--panel2);
+  color: var(--cyan);
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+.footer-formula {
+  margin-top: 17px;
+  padding: 17px;
+  border-radius: 12px;
+  background: #4de5ff0b;
+  border: 1px solid #4de5ff30;
+  text-align: center;
+  line-height: 1.8;
+}
+.footer-formula strong { color: var(--cyan); font-size: clamp(17px, 2.4vw, 25px); }
+footer {
+  padding: 22px 10px 8px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.8;
+}
+@media(max-width:1050px) {
+  .workspace { grid-template-columns: minmax(0, 1fr) 285px; }
+  #scene { height: 420px; }
+  .math-card { padding: 14px; }
+}
+@media(max-width:780px) {
+  .workspace { grid-template-columns: 1fr; }
+  .sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  #scene { height: min(66vw, 440px); min-height: 310px; }
+  .steps { grid-template-columns: 1fr; }
+}
+@media(max-width:520px) {
+  header { padding: 20px 15px; }
+  .header-inner { display: block; }
+  .header-badge { display: inline-block; margin-top: 13px; }
+  main { padding: 13px 9px 25px; }
+  .objective { padding: 12px; font-size: 13px; }
+  .sidebar { grid-template-columns: 1fr; }
+  .math-grid { grid-template-columns: 1fr; }
+  .math-card { padding: 18px; }
+  .math-card .answer { font-size: 32px; }
+  #scene { height: 82vw; min-height: 290px; max-height: 370px; }
+  .overlay { padding: 7px 9px; font-size: 10px; }
+  .overlay strong { font-size: 14px; }
+  #sceneHelp { max-width: 150px; }
+  .lesson { padding: 16px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="eyebrow">MATHEMATIK TAHUN 4 · KSSR SEMAKAN</div>
+      <h1>📐 MathLab 3D</h1>
+      <p>Teroka Perimeter, Luas dan Isi Padu secara interaktif!</p>
+    </div>
+    <div class="header-badge">MAKMAL UKURAN & SUKATAN
+      <span>3 konsep · 1 simulasi · Banyak penerokaan</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="objective">
+    <div class="emoji">🎯</div>
+    <div>
+      <strong>Misi Pembelajaran</strong><br>
+      Kenal pasti perimeter, tentukan luas menggunakan petak unit persegi dan hitung isi padu menggunakan kubus unit padu.
+      <br><small>DSKP Matematik Tahun 4 · 6.3 Luas dan Perimeter · 6.4 Isi Padu Pepejal</small>
+    </div>
+  </section>
+
+  <section class="workspace">
+    <div class="card">
+      <div class="card-heading">
+        <div>
+          <h2>🌐 Ruang Penerokaan 3D</h2>
+          <div class="muted">Putar objek untuk melihatnya dari pelbagai sudut.</div>
+        </div>
+        <span id="modeStatus" class="status">MOD ISI PADU</span>
+      </div>
+
+      <div id="sceneWrap">
+        <div class="overlay" id="tagP">↔ PANJANG
+          <strong id="labelP">4 unit</strong>
+        </div>
+        <div class="overlay" id="tagL">↗ LEBAR
+          <strong id="labelL">3 unit</strong>
+        </div>
+        <div class="overlay" id="tagT">↕ TINGGI
+          <strong id="labelT">2 unit</strong>
+        </div>
+        <canvas id="scene" aria-label="Visualisasi 3D interaktif perimeter, luas dan isi padu"></canvas>
+        <div class="overlay" id="sceneHelp">
+          🖱 Seret untuk putar<br>
+          Skrol untuk zum<br>
+          Klik kanan untuk pan
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--pink)"></i> Perimeter</span>
+        <span><i class="swatch" style="background:var(--green)"></i> Petak luas</span>
+        <span><i class="swatch" style="background:var(--cyan)"></i> Kubus unit</span>
+        <span><i class="swatch" style="background:#f5e85d"></i> Tapak</span>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <section class="card">
+        <div class="card-heading"><h2>🎛️ Dimensi Bentuk</h2></div>
+        <div class="control-body">
+          <div class="slider-block">
+            <div class="slider-head">
+              <label for="panjang">↔ Panjang (p)</label>
+              <output class="slider-value" id="nilaiP" for="panjang">4</output>
+            </div>
+            <input id="panjang" type="range" min="1" max="8" step="1" value="4">
+            <div class="scale"><span>1 unit</span><span>8 unit</span></div>
+          </div>
+          <div class="slider-block">
+            <div class="slider-head">
+              <label for="lebar">↗ Lebar (l)</label>
+              <output class="slider-value" id="nilaiL" for="lebar">3</output>
+            </div>
+            <input id="lebar" type="range" min="1" max="8" step="1" value="3">
+            <div class="scale"><span>1 unit</span><span>8 unit</span></div>
+          </div>
+          <div class="slider-block">
+            <div class="slider-head">
+              <label for="tinggi">↕ Tinggi (t)</label>
+              <output class="slider-value" id="nilaiT" for="tinggi">2</output>
+            </div>
+            <input id="tinggi" type="range" min="1" max="8" step="1" value="2">
+            <div class="scale"><span>1 unit</span><span>8 unit</span></div>
+          </div>
+          <div class="muted">Ubah dimensi dan perhatikan perubahan ukuran serta jawapan.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-heading"><h2>🧠 Mod Pembelajaran</h2></div>
+        <div class="control-body">
+          <div class="mode-list">
+            <label class="mode">
+              <input type="radio" name="mode" value="perimeter">
+              <span class="mode-icon">💗</span>
+              <span><strong class="pink">Perimeter (1D)</strong>
+                <small>Garisan luar tapak sahaja. Kira jumlah panjang sempadan.</small>
+              </span>
+            </label>
+            <label class="mode">
+              <input type="radio" name="mode" value="area">
+              <span class="mode-icon">🟩</span>
+              <span><strong class="green">Luas (2D)</strong>
+                <small>Satah tapak dengan petak 1 unit persegi.</small>
+              </span>
+            </label>
+            <label class="mode">
+              <input type="radio" name="mode" value="volume" checked>
+              <span class="mode-icon">🧊</span>
+              <span><strong class="cyan">Isi Padu (3D)</strong>
+                <small>Kubus unit 1 × 1 × 1 yang membentuk kuboid.</small>
+              </span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-heading"><h2>🚀 Aktiviti Interaktif</h2></div>
+        <div class="control-body">
+          <div class="buttons">
+            <button class="btn btn-animate" id="animateBtn">▶ Animasi Pembinaan</button>
+            <button class="btn btn-reset" id="resetBtn">↺ Reset Simulasi</button>
+          </div>
+          <p id="animStatus" class="muted" aria-live="polite">Pilih mod dan mula meneroka!</p>
+        </div>
+      </section>
+    </aside>
+  </section>
+
+  <section class="math-grid">
+    <article class="math-card" id="cardP">
+      <h3 class="pink">💗 01 · PERIMETER</h3>
+      <div class="muted">Rumus: jumlah panjang sempadan luar.</div>
+      <div class="formula pink">P = 2 × (p + l)</div>
+      <div class="answer pink" id="perimeterAnswer">14 unit</div>
+      <div class="explain">
+        Kiraan sisi:<br>
+        <strong id="perimeterSteps">4 + 3 + 4 + 3 = 14 unit</strong><br>
+        Dua sisi panjang dan dua sisi lebar.
+      </div>
+      <div class="active-note">Perimeter mengukur panjang sempadan luar, bukan ruang di dalam bentuk.</div>
+    </article>
+
+    <article class="math-card" id="cardA">
+      <h3 class="green">🟩 02 · LUAS TAPAK</h3>
+      <div class="muted">Rumus: panjang darab lebar.</div>
+      <div class="formula green">L = p × l</div>
+      <div class="answer green" id="areaAnswer">12 unit²</div>
+      <div class="explain">
+        Kiraan petak:<br>
+        <strong id="areaSteps">4 × 3 = 12 petak</strong><br>
+        Setiap petak mewakili 1 unit persegi.
+      </div>
+      <div class="active-note">Luas mengukur ruang di dalam tapak. Kira setiap petak tanpa mengulang.</div>
+    </article>
+
+    <article class="math-card active-v" id="cardV">
+      <h3 class="cyan">🧊 03 · ISI PADU</h3>
+      <div class="muted">Rumus: luas tapak darab tinggi.</div>
+      <div class="formula cyan">V = p × l × t</div>
+      <div class="answer cyan" id="volumeAnswer">24 unit³</div>
+      <div class="explain">
+        Kiraan kubus:<br>
+        <strong id="volumeSteps">4 × 3 × 2 = 24 kubus</strong><br>
+        Setiap kubus mewakili 1 unit padu.
+      </div>
+      <div class="active-note" id="volumeNote">
+        Isi padu = Luas tapak (12 unit²) dilapiskan sebanyak 2 kali.
+      </div>
+      <div id="layers"></div>
+    </article>
+  </section>
+
+  <section class="lesson">
+    <h2>📚 Panduan Pembelajaran</h2>
+    <p>Gunakan tiga mod untuk membandingkan panjang sempadan, ruang pada permukaan dan ruang yang memenuhi pepejal.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-no">01</div>
+        <strong class="pink">Jejaki perimeter</strong>
+        Ikuti keempat-empat sisi tapak. Tambahkan dua sisi panjang dan dua sisi lebar.
+        <b class="pink" id="lessonP">4 + 3 + 4 + 3 = 14 unit</b>
+      </div>
+      <div class="step">
+        <div class="step-no">02</div>
+        <strong class="green">Kira petak luas</strong>
+        Kira bilangan petak dalam satu baris dan bilangan baris, kemudian darabkan.
+        <b class="green" id="lessonA">4 × 3 = 12 unit²</b>
+      </div>
+      <div class="step">
+        <div class="step-no">03</div>
+        <strong class="cyan">Susun kubus unit</strong>
+        Kira kubus pada tapak, kemudian darabkan dengan bilangan lapisan.
+        <b class="cyan" id="lessonV">12 × 2 = 24 unit³</b>
+      </div>
+    </div>
+    <div class="footer-formula">
+      <div class="muted">INGAT TIGA KONSEP INI</div>
+      <strong>Perimeter = unit &nbsp; | &nbsp; Luas = unit² &nbsp; | &nbsp; Isi Padu = unit³</strong>
+    </div>
+  </section>
+
+  <footer>
+    MathLab 3D · Bahan bantu mengajar Matematik Tahun 4 · KSSR Semakan<br>
+    Standard Pembelajaran 6.3.1, 6.3.2 dan 6.4.1
+  </footer>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const canvas = $("scene");
+  const wrap = $("sceneWrap");
+
+  const sliders = {
+    p: $("panjang"),
+    l: $("lebar"),
+    t: $("tinggi")
+  };
+
+  const values = { p: 4, l: 3, t: 2 };
+  const colours = {
+    pink: 0xff4f9a,
+    green: 0x80f5a5,
+    yellow: 0xf5e85d,
+    cyan: 0x4de5ff,
+    blue: 0x578dff
+  };
+
+  let scene, camera, renderer, orbit, resizeObserver;
+  let perimeterGroup, areaGroup, volumeGroup, labelGroup;
+  let floorGrid;
+  let currentMode = "volume";
+  let animationId = null;
+  let disposed = false;
+  let busy = false;
+  let geometryVersion = 0;
+
+  const groupsReady = () => !!(
+    perimeterGroup && areaGroup && volumeGroup && labelGroup
+  );
+
+  function getDims() {
+    return {
+      p: Number(sliders.p.value),
+      l: Number(sliders.l.value),
+      t: Number(sliders.t.value)
+    };
+  }
+
+  function makeMaterial(color, opacity = 1, extra = {}) {
+    return new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.42,
+      metalness: 0,
+      transparent: opacity < 1,
+      opacity,
+      ...extra
+    });
+  }
+
+  function disposeGroup(group) {
+    while (group.children.length) {
+      const obj = group.children[group.children.length - 1];
+      group.remove(obj);
+
+      obj.traverse(child => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          const materials = Array.isArray(child.material)
+            ? child.material : [child.material];
+
+          materials.forEach(mat => {
+            if (mat.map) mat.map.dispose();
+            mat.dispose();
+          });
+        }
+      });
+    }
+  }
+
+  function createTextSprite(text, color = "#ffffff", background = "#18233e") {
+    const c = document.createElement("canvas");
+    const ctx = c.getContext("2d");
+    const font = 36;
+    const padX = 18;
+    const padY = 12;
+
+    ctx.font = `bold ${font}px Arial`;
+    const textWidth = Math.ceil(ctx.measureText(text).width);
+
+    c.width = textWidth + padX * 2;
+    c.height = font + padY * 2;
+
+    ctx.font = `bold ${font}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.fillStyle = background;
+    ctx.beginPath();
+    ctx.roundRect(1, 1, c.width - 2, c.height - 2, 13);
+    ctx.fill();
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = color;
+    ctx.fillText(text, c.width / 2, c.height / 2);
+
+    const texture = new THREE.CanvasTexture(c);
+    texture.encoding = THREE.sRGBEncoding;
+
+    const sprite = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthTest: false
+      })
+    );
+
+    sprite.scale.set(c.width / 100, c.height / 100, 1);
+    sprite.renderOrder = 10;
+    return sprite;
+  }
+
+  function addLabel(group, text, position, color, background) {
+    const sprite = createTextSprite(text, color, background);
+    sprite.position.set(...position);
+    group.add(sprite);
+    return sprite;
+  }
+
+  // Garisan perimeter menggunakan TubeGeometry agar lebih tebal
+  // berbanding LineBasicMaterial pada kebanyakan pelayar WebGL.
+  function addNeonEdge(group, a, b) {
+    const start = new THREE.Vector3(...a);
+    const end = new THREE.Vector3(...b);
+    const direction = new THREE.Vector3().subVectors(end, start);
+    const length = direction.length();
+
+    if (length <= 0) return;
+
+    const geometry = new THREE.TubeGeometry(
+      new THREE.LineCurve3(start, end),
+      24,
+      0.045,
+      8,
+      false
+    );
+
+    const material = new THREE.MeshStandardMaterial({
+      color: colours.pink,
+      emissive: colours.pink,
+      emissiveIntensity: 0.8,
+      roughness: 0.25,
+      metalness: 0
+    });
+
+    group.add(new THREE.Mesh(geometry, material));
+
+    // Titik hujung yang terang.
+    for (const point of [start, end]) {
+      const marker = new THREE.Mesh(
+        new THREE.SphereGeometry(0.075, 12, 12),
+        new THREE.MeshBasicMaterial({ color: 0xffa6d0 })
+      );
+      marker.position.copy(point);
+      group.add(marker);
+    }
+  }
+
+  function buildPerimeter(p, l) {
+    disposeGroup(perimeterGroup);
+
+    const y = 0.10;
+    const x1 = -p / 2, x2 = p / 2;
+    const z1 = -l / 2, z2 = l / 2;
+
+    // Hanya sempadan luar tapak; tiada petak atau muka pepejal.
+    addNeonEdge(perimeterGroup, [x1,y,z1], [x2,y,z1]);
+    addNeonEdge(perimeterGroup, [x2,y,z1], [x2,y,z2]);
+    addNeonEdge(perimeterGroup, [x2,y,z2], [x1,y,z2]);
+    addNeonEdge(perimeterGroup, [x1,y,z2], [x1,y,z1]);
+
+    const margin = 0.48;
+
+    addLabel(
+      perimeterGroup, `${p} unit`,
+      [0, y + 0.28, z1 - margin], "#ff8cba"
+    );
+    addLabel(
+      perimeterGroup, `${l} unit`,
+      [x2 + margin, y + 0.28, 0], "#ff8cba"
+    );
+    addLabel(
+      perimeterGroup, `${p} unit`,
+      [0, y + 0.28, z2 + margin], "#ff8cba"
+    );
+    addLabel(
+      perimeterGroup, `${l} unit`,
+      [x1 - margin, y + 0.28, 0], "#ff8cba"
+    );
+  }
+
+  function buildArea(p, l) {
+    disposeGroup(areaGroup);
+
+    const tileGeometry = new THREE.PlaneGeometry(0.96, 0.96);
+    const edgeGeometry = new THREE.EdgesGeometry(
+      new THREE.BoxGeometry(0.96, 0.035, 0.96)
+    );
+
+    const tileMaterials = [
+      makeMaterial(0x80f5a5, 0.92, {
+        emissive: 0x163e26,
+        emissiveIntensity: 0.35,
+        side: THREE.DoubleSide
+      }),
+      makeMaterial(0xf5e85d, 0.95, {
+        emissive: 0x4a4310,
+        emissiveIntensity: 0.25,
+        side: THREE.DoubleSide
+      })
+    ];
+
+    const edgeMaterial = new THREE.LineBasicMaterial({
+      color: 0x183c30,
+      transparent: true,
+      opacity: 0.9
+    });
+
+    for (let z = 0; z < l; z++) {
+      for (let x = 0; x < p; x++) {
+        const tile = new THREE.Mesh(
+          tileGeometry,
+          tileMaterials[(x + z) % 2]
+        );
+
+        tile.rotation.x = -Math.PI / 2;
+        tile.position.set(x - (p - 1) / 2, 0.055, z - (l - 1) / 2);
+        tile.userData.cellIndex = z * p + x;
+        areaGroup.add(tile);
+
+        const edge = new THREE.LineSegments(
+          edgeGeometry,
+          edgeMaterial
+        );
+
+        edge.position.set(
+          x - (p - 1) / 2,
+          0.064,
+          z - (l - 1) / 2
+        );
+
+        edge.userData.cellIndex = z * p + x;
+        areaGroup.add(edge);
+      }
+    }
+
+    addLabel(
+      areaGroup, `${p * l} petak`,
+      [0, 0.22, 0], "#aaffc0", "#142b29"
+    );
+  }
+
+  function buildVolume(p, l, t) {
+    disposeGroup(volumeGroup);
+
+    const geometry = new THREE.BoxGeometry(0.965, 0.965, 0.965);
+    const edgeGeometry = new THREE.EdgesGeometry(geometry);
+
+    const cubeMaterials = [
+      makeMaterial(0x4de5ff, 0.86, {
+        emissive: 0x103d5a,
+        emissiveIntensity: 0.4
+      }),
+      makeMaterial(0x578dff, 0.88, {
+        emissive: 0x172c62,
+        emissiveIntensity: 0.4
+      })
+    ];
+
+    const edgeMaterial = new THREE.LineBasicMaterial({
+      color: 0x152c51,
+      transparent: true,
+      opacity: 0.92
+    });
+
+    let index = 0;
+
+    for (let y = 0; y < t; y++) {
+      for (let z = 0; z < l; z++) {
+        for (let x = 0; x < p; x++) {
+          const position = new THREE.Vector3(
+            x - (p - 1) / 2,
+            y + 0.5,
+            z - (l - 1) / 2
+          );
+
+          const cube = new THREE.Mesh(
+            geometry,
+            cubeMaterials[y % 2]
+          );
+
+          cube.position.copy(position);
+          cube.userData.cubeIndex = index;
+          cube.userData.layer = y + 1;
+          volumeGroup.add(cube);
+
+          const edge = new THREE.LineSegments(
+            edgeGeometry,
+            edgeMaterial
+          );
+
+          edge.position.copy(position);
+          edge.userData.cubeIndex = index;
+          volumeGroup.add(edge);
+
+          index++;
+        }
+      }
+    }
+
+    // Label tinggi di luar blok.
+    addLabel(
+      volumeGroup, `${t} unit tinggi`,
+      [-p / 2 - 0.8, t / 2, l / 2],
+      "#4de5ff"
+    );
+  }
+
+  function selectMode(mode) {
+    currentMode = mode;
+
+    document.querySelectorAll('input[name="mode"]').forEach(radio => {
+      radio.checked = radio.value === mode;
+    });
+
+    if (!groupsReady()) return;
+
+    perimeterGroup.visible = mode === "perimeter";
+    areaGroup.visible = mode === "area";
+    volumeGroup.visible = mode === "volume";
+
+    $("modeStatus").textContent = {
+      perimeter: "MOD PERIMETER",
+      area: "MOD LUAS",
+      volume: "MOD ISI PADU"
+    }[mode];
+
+    $("tagT").style.display = mode === "volume" ? "block" : "none";
+
+    $("cardP").classList.toggle("active-p", mode === "perimeter");
+    $("cardA").classList.toggle("active-a", mode === "area");
+    $("cardV").classList.toggle("active-v", mode === "volume");
+
+    const status = {
+      perimeter: "Jejaki empat sisi untuk mencari jumlah panjang sempadan.",
+      area: "Setiap petak mewakili 1 unit persegi.",
+      volume: "Setiap kubus mewakili 1 unit padu."
+    };
+
+    $("animStatus").textContent = status[mode];
+  }
+
+  function updateMath(p, l, t) {
+    const perimeter = 2 * (p + l);
+    const area = p * l;
+    const volume = area * t;
+
+    $("perimeterAnswer").textContent = `${perimeter} unit`;
+    $("perimeterSteps").textContent =
+      `${p} + ${l} + ${p} + ${l} = ${perimeter} unit`;
+
+    $("areaAnswer").textContent = `${area} unit²`;
+    $("areaSteps").textContent = `${p} × ${l} = ${area} petak`;
+
+    $("volumeAnswer").textContent = `${volume} unit³`;
+    $("volumeSteps").textContent =
+      `${p} × ${l} × ${t} = ${volume} kubus`;
+
+    $("volumeNote").textContent =
+      `Isi padu = Luas tapak (${area} unit²) dilapiskan sebanyak ${t} kali.`;
+
+    $("lessonP").textContent =
+      `${p} + ${l} + ${p} + ${l} = ${perimeter} unit`;
+
+    $("lessonA").textContent =
+      `${p} × ${l} = ${area} unit²`;
+
+    $("lessonV").textContent =
+      `${area} × ${t} = ${volume} unit³`;
+
+    const layers = $("layers");
+    layers.replaceChildren();
+
+    for (let i = 1; i <= t; i++) {
+      const chip = document.createElement("span");
+      chip.className = "layer-chip";
+      chip.textContent = `Lapisan ${i}`;
+      layers.appendChild(chip);
+    }
+  }
+
+  function updateAll(rebuild = true) {
+    if (!scene || disposed) return;
+
+    const { p, l, t } = getDims();
+
+      // Selaraskan grid supaya perimeter berada pada garisan grid penuh.
+    if (floorGrid) {
+      floorGrid.position.x = p % 2 === 0 ? 0 : -0.5;
+      floorGrid.position.z = l % 2 === 0 ? 0 : -0.5;
+    }
+
+      values.p = p;
+      values.l = l;
+      values.t = t;
+
+    $("nilaiP").textContent = p;
+    $("nilaiL").textContent = l;
+    $("nilaiT").textContent = t;
+
+    $("labelP").textContent = `${p} unit`;
+    $("labelL").textContent = `${l} unit`;
+    $("labelT").textContent = `${t} unit`;
+
+    updateMath(p, l, t);
+
+    if (rebuild) {
+      geometryVersion++;
+      buildPerimeter(p, l);
+      buildArea(p, l);
+      buildVolume(p, l, t);
+      selectMode(currentMode);
+    }
+  }
+
+  function frameCamera() {
+    const { p, l, t } = getDims();
+    const largest = Math.max(p, l, t);
+    const distance = Math.max(10, largest * 2.15 + 5);
+
+    camera.position.set(distance, distance * 0.82, distance * 1.05);
+    orbit.target.set(0, Math.max(0.8, t / 2), 0);
+    orbit.update();
+  }
+
+  function resize() {
+    if (!renderer || !camera) return;
+
+    const w = Math.max(1, wrap.clientWidth);
+    const h = Math.max(1, wrap.clientHeight);
+
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+
+  function init() {
+    if (!window.THREE || !THREE.OrbitControls) {
+      $("animStatus").textContent =
+        "Three.js tidak dapat dimuatkan. Semak sambungan Internet dan muat semula halaman.";
+      $("animateBtn").disabled = true;
+      return;
+    }
+
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        powerPreference: "high-performance"
+      });
+
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.outputEncoding = THREE.sRGBEncoding;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x19233b);
+      scene.fog = new THREE.Fog(0x19233b, 26, 55);
+
+      camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+      camera.position.set(12, 11, 14);
+
+      orbit = new THREE.OrbitControls(camera, renderer.domElement);
+      orbit.enableDamping = true;
+      orbit.dampingFactor = 0.07;
+      orbit.enablePan = true;
+      orbit.enableZoom = true;
+      orbit.minDistance = 4;
+      orbit.maxDistance = 35;
+      orbit.maxPolarAngle = Math.PI * 0.49;
+      orbit.target.set(0, 1, 0);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.15);
+      keyLight.position.set(8, 14, 9);
+      scene.add(keyLight);
+
+      const fillLight = new THREE.DirectionalLight(0x7da9ff, 0.65);
+      fillLight.position.set(-8, 7, -5);
+      scene.add(fillLight);
+
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(80, 80),
+        new THREE.MeshStandardMaterial({
+          color: 0x1c2941,
+          roughness: 1
+        })
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -0.08;
+      scene.add(ground);
+
+      floorGrid = new THREE.GridHelper(50, 50, 0x536b92, 0x354563);
+      floorGrid.position.y = -0.06;
+      scene.add(floorGrid);
+
+      perimeterGroup = new THREE.Group();
+      areaGroup = new THREE.Group();
+      volumeGroup = new THREE.Group();
+      labelGroup = new THREE.Group();
+
+      scene.add(perimeterGroup, areaGroup, volumeGroup, labelGroup);
+
+      resizeObserver = new ResizeObserver(resize);
+      resizeObserver.observe(wrap);
+      resize();
+
+      Object.values(sliders).forEach(slider => {
+        slider.addEventListener("input", () => {
+          cancelConstruction();
+          updateAll(true);
+          $("animStatus").textContent = "Dimensi dikemas kini!";
+        });
+      });
+
+      document.querySelectorAll('input[name="mode"]').forEach(radio => {
+        radio.addEventListener("change", () => {
+          cancelConstruction();
+          selectMode(radio.value);
+        });
+      });
+
+      $("animateBtn").addEventListener("click", runConstruction);
+      $("resetBtn").addEventListener("click", resetAll);
+
+      updateAll(true);
+      frameCamera();
+      renderLoop();
+
+    } catch (err) {
+      console.error(err);
+      $("animStatus").textContent =
+        "Paparan 3D gagal dimulakan. Cuba pelayar yang menyokong WebGL.";
+      $("animateBtn").disabled = true;
+    }
+  }
+
+  function cancelConstruction() {
+    if (animationId !== null) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+
+    busy = false;
+    $("animateBtn").disabled = false;
+    $("animateBtn").textContent = "▶ Animasi Pembinaan";
+
+    if (groupsReady()) {
+      volumeGroup.children.forEach(obj => { obj.visible = true; });
+      areaGroup.children.forEach(obj => { obj.visible = true; });
+      selectMode(currentMode);
+    }
+  }
+
+  // Urutan demonstrasi: perimeter -> petak luas -> lapisan kubus.
+  // Perubahan slider membatalkan animasi lama supaya data tidak bercampur.
+  function runConstruction() {
+    if (!groupsReady() || busy) return;
+
+    const version = geometryVersion;
+    const p = values.p, l = values.l, t = values.t;
+    const base = p * l;
+    const total = base * t;
+
+    busy = true;
+    $("animateBtn").disabled = true;
+    $("animateBtn").textContent = "⏳ Animasi berjalan...";
+
+    // Sediakan mod perimeter dahulu.
+    selectMode("perimeter");
+    $("animStatus").textContent = "Langkah 1/3: Jejaki perimeter tapak...";
+
+    const start = performance.now();
+    const perimeterDuration = 1100;
+    const areaDuration = 1200;
+    const volumeDuration = Math.max(1500, Math.min(total * 32, 6000));
+    const totalDuration = perimeterDuration + areaDuration + volumeDuration;
+
+    // Sembunyikan semua petak dan kubus untuk pendedahan berperingkat.
+    areaGroup.children.forEach(obj => { obj.visible = false; });
+    volumeGroup.children.forEach(obj => { obj.visible = false; });
+
+    function tick(now) {
+      if (disposed || version !== geometryVersion) {
+        cancelConstruction();
+        return;
+      }
+
+      const elapsed = now - start;
+
+      if (elapsed < perimeterDuration) {
+        selectMode("perimeter");
+        $("animStatus").textContent =
+          "Langkah 1/3: Perhatikan empat sisi perimeter.";
+      } else if (elapsed < perimeterDuration + areaDuration) {
+        const progress = (elapsed - perimeterDuration) / areaDuration;
+        const visibleCells = Math.min(
+          base,
+          Math.ceil(progress * base)
+        );
+
+        selectMode("area");
+
+        areaGroup.children.forEach(obj => {
+          if (obj.userData.cellIndex !== undefined) {
+            obj.visible = obj.userData.cellIndex < visibleCells;
+          } else {
+            obj.visible = true;
+          }
+        });
+
+        $("animStatus").textContent =
+          `Langkah 2/3: Membina petak luas ${visibleCells}/${base}.`;
+      } else if (elapsed < totalDuration) {
+        const volumeElapsed = elapsed - perimeterDuration - areaDuration;
+        const progress = volumeElapsed / volumeDuration;
+        const visibleCubes = Math.min(total, Math.ceil(progress * total));
+
+        selectMode("volume");
+
+        volumeGroup.children.forEach(obj => {
+          if (obj.userData.cubeIndex !== undefined) {
+            obj.visible = obj.userData.cubeIndex < visibleCubes;
+          }
+        });
+
+        const layer = Math.min(t, Math.max(1, Math.ceil(visibleCubes / base)));
+
+        $("animStatus").textContent =
+          `Langkah 3/3: Menyusun lapisan ${layer}/${t} · ${visibleCubes}/${total} kubus.`;
+      } else {
+        selectMode("volume");
+        volumeGroup.children.forEach(obj => { obj.visible = true; });
+        areaGroup.children.forEach(obj => { obj.visible = true; });
+
+        busy = false;
+        animationId = null;
+        $("animateBtn").disabled = false;
+        $("animateBtn").textContent = "↻ Ulang Animasi";
+        $("animStatus").textContent =
+          `Selesai! ${base} petak tapak × ${t} lapisan = ${total} unit³.`;
+        return;
+      }
+
+      animationId = requestAnimationFrame(tick);
+    }
+
+    animationId = requestAnimationFrame(tick);
+  }
+
+  function resetAll() {
+    cancelConstruction();
+
+    sliders.p.value = 4;
+    sliders.l.value = 3;
+    sliders.t.value = 2;
+
+    currentMode = "volume";
+    updateAll(true);
+    frameCamera();
+    selectMode("volume");
+
+    $("animStatus").textContent =
+      "Tetapan asal dipulihkan: perimeter 14 unit, luas 12 unit², isi padu 24 unit³.";
+  }
+
+  function renderLoop() {
+    if (disposed) return;
+    requestAnimationFrame(renderLoop);
+
+    if (orbit) orbit.update();
+    if (renderer && scene && camera) renderer.render(scene, camera);
+  }
+
+  window.addEventListener("beforeunload", () => {
+    disposed = true;
+    if (resizeObserver) resizeObserver.disconnect();
+    if (animationId !== null) cancelAnimationFrame(animationId);
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
